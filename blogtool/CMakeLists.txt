@@ -10,4 +10,7 @@ target_sources(${tgt_name} PRIVATE ${sources})
 
 target_include_directories(${tgt_name} PUBLIC include)
 
-# target_link_libraries(${tgt_name} PRIVATE biology network common)
+target_link_libraries(${tgt_name} PRIVATE 
+    CLI11::CLI11
+    fmt::fmt
+)

@@ -1,7 +1,7 @@
-#include <iostream>
+#include "fmt/core.h"
 
 int main()
 {
-  std::cout << "Hello, World!" << std::endl;
+  fmt::print("Hello, world! This is my blog tool!\n");
   return 0;
 }
