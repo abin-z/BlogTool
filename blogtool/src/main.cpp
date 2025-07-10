@@ -1,17 +1,14 @@
-#ifdef _WIN32
-#include <windows.h>
-
-#include <string>
-#include <vector>
-
-#endif
-
 #include <fmt/core.h>
 
 #include <CLI/CLI.hpp>
 #include <cstdlib>
+#include <string>
+#include <vector>
 
-// UTF-16 wchar_t* 转 UTF-8 std::string
+#ifdef _WIN32
+#include <windows.h>
+
+// Windows 宽字符转 UTF-8
 std::string utf16_to_utf8(const std::wstring& wstr)
 {
   int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstr.data(), (int)wstr.size(), NULL, 0, NULL, NULL);
@@ -20,49 +17,28 @@ std::string utf16_to_utf8(const std::wstring& wstr)
   return strTo;
 }
 
-// 将 wmain 参数转换成 UTF-8 char* 数组
-std::vector<char*> convert_wargv_to_argv(int argc, wchar_t** wargv, std::vector<std::string>& storage)
+// 宽字符 argv 转 UTF-8 argv
+std::vector<std::string> convert_wargv_to_utf8_strings(int argc, wchar_t** wargv)
 {
-  storage.clear();
-  storage.reserve(argc);
-  std::vector<char*> argv;
-
+  std::vector<std::string> args;
+  args.reserve(argc);
   for (int i = 0; i < argc; ++i)
   {
-    std::string arg = utf16_to_utf8(wargv[i]);
-    storage.push_back(std::move(arg));
+    args.push_back(utf16_to_utf8(wargv[i]));
   }
-  for (int i = 0; i < argc; ++i)
-  {
-    argv.push_back(const_cast<char*>(storage[i].c_str()));
-  }
-  return argv;
+  return args;
 }
+#endif
 
-#ifdef _WIN32
-int wmain(int argc, wchar_t** wargv)
+// 业务逻辑统一函数，用 UTF-8 编码参数
+int run_cli(int argc, char** argv)
 {
+#ifdef _WIN32
   SetConsoleOutputCP(CP_UTF8);
   std::system("cls");
-
-  std::vector<std::string> utf8_args;
-  std::vector<char*> argv = convert_wargv_to_argv(argc, wargv, utf8_args);
-
-  CLI::App app{"A CLI + fmt demo"};
-
-  std::string name = "World";
-  app.add_option("-n,--name", name, "Name to greet");
-
-  CLI11_PARSE(app, argc, argv.data());
-
-  fmt::print("Hello, {}!\n", name);
-
-  return 0;
-}
 #else
-int main(int argc, char** argv)
-{
   std::system("clear");
+#endif
 
   CLI::App app{"A CLI + fmt demo"};
 
@@ -74,5 +50,24 @@ int main(int argc, char** argv)
   fmt::print("Hello, {}!\n", name);
 
   return 0;
+}
+
+#ifdef _WIN32
+int wmain(int argc, wchar_t** wargv)
+{
+  // 转换宽字符参数到 UTF-8 字符串，存储起来，保证指针有效
+  std::vector<std::string> utf8_args = convert_wargv_to_utf8_strings(argc, wargv);
+
+  // 创建 char* 数组指针，供 CLI11 使用
+  std::vector<char*> argv;
+  argv.reserve(argc);
+  for (auto& arg : utf8_args) argv.push_back(arg.data());
+
+  return run_cli(argc, argv.data());
+}
+#else
+int main(int argc, char** argv)
+{
+  return run_cli(argc, argv);
 }
 #endif
