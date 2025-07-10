@@ -3,6 +3,9 @@
 #include <CLI/CLI.hpp>
 #include <cstdlib>
 
+// TODO: 解决中文输入崩溃问题
+// TODO: git submodule 无效问题
+
 int main(int argc, char** argv)
 {
 #ifdef _WIN32
@@ -15,7 +18,7 @@ int main(int argc, char** argv)
   CLI::App app{"A CLI + fmt demo"};
 
   std::string name = "World";
-  app.add_option("-n,--name", name, "Name to greet");
+  app.add_option("-n,--name", name, "Name to greet"); // TODO -n 输入中文会崩溃
 
   CLI11_PARSE(app, argc, argv);
 
