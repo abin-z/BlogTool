@@ -17,5 +17,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/build_output/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/build_output/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/build_output/bin)
 
-add_subdirectory(third_party) # 添加第三方库
-add_subdirectory(blogtool)    # 添加博客工具
+add_subdirectory(third_party/CLI11)   # 添加CLI11库
+add_subdirectory(third_party/fmt)     # 添加fmt库
+add_subdirectory(third_party/spdlog)  # 添加spdlog库
+add_subdirectory(blogtool)            # 添加博客工具
