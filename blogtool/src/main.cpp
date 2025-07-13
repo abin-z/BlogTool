@@ -31,7 +31,7 @@ std::vector<std::string> convert_wargv_to_utf8_strings(int argc, wchar_t** wargv
 #endif
 
 // 业务逻辑统一函数，用 UTF-8 编码参数
-int run_cli(int argc, char** argv)
+inline int run_cli(int argc, char** argv)
 {
 #ifdef _WIN32
   SetConsoleOutputCP(CP_UTF8);
@@ -48,12 +48,13 @@ int run_cli(int argc, char** argv)
   CLI11_PARSE(app, argc, argv);
 
   fmt::print("Hello, {}!\n", name);
+  fmt::print("请输入要创建的博客标题: ");
 
   return 0;
 }
 
 #ifdef _WIN32
-int wmain(int argc, wchar_t** wargv)
+int wmain(int argc, wchar_t** wargv) // Windows 使用 wmain 入口点,保证输入中文输入不会崩溃
 {
   // 转换宽字符参数到 UTF-8 字符串，存储起来，保证指针有效
   std::vector<std::string> utf8_args = convert_wargv_to_utf8_strings(argc, wargv);
