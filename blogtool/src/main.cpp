@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <iostream>
+#include "fmt/base.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -34,7 +36,7 @@ std::vector<std::string> convert_wargv_to_utf8_strings(int argc, wchar_t** wargv
 inline int run_cli(int argc, char** argv)
 {
 #ifdef _WIN32
-  SetConsoleOutputCP(CP_UTF8);
+  std::system("chcp 65001 > nul");  // 设置控制台编码为 UTF-8，静默输出
   std::system("cls");
 #else
   std::system("clear");
@@ -48,7 +50,16 @@ inline int run_cli(int argc, char** argv)
   CLI11_PARSE(app, argc, argv);
 
   fmt::print("Hello, {}!\n", name);
-  fmt::print("请输入要创建的博客标题: ");
+  fmt::print("请输入要创建的博客标题: \n");
+
+  std::string title;
+  std::getline(std::cin, title);
+  if (title.empty())
+  {
+    fmt::print("标题不能为空，请重新输入。\n");
+    return 1; // 返回错误码
+  }
+  fmt::print("创建博客标题: {}\n", title);
 
   return 0;
 }
