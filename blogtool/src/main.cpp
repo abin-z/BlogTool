@@ -59,7 +59,10 @@ inline int run_cli(int argc, char** argv)
     fmt::print("标题不能为空，请重新输入。\n");
     return 1; // 返回错误码
   }
-  fmt::print("创建博客标题: {}\n", title);
+  fmt::print("正在创建博客: {}\n", title);
+  std::string command = fmt::format("hugo new \"{}\"", title);
+  fmt::print("执行命令: {}\n", command);
+  // std::system()
 
   return 0;
 }
