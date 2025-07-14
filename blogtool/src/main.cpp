@@ -60,7 +60,8 @@ inline int run_cli(int argc, char** argv)
     return 1; // 返回错误码
   }
   fmt::print("正在创建博客: {}\n", title);
-  std::string command = fmt::format("hugo new \"{}\"", title);
+  // TODO 需要到hugo目录下执行命令, 使用c++17的filesystem库来获取当前目录
+  std::string command = fmt::format("hugo new post/{}/index.md", title);
   fmt::print("执行命令: {}\n", command);
   // std::system()
 
