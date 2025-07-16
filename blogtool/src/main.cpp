@@ -1,5 +1,6 @@
 #include <fmt/core.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/daily_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
@@ -129,9 +130,13 @@ void set_file_logger()
     console_sink->set_pattern("[%^%Y-%m-%d %H:%M:%S %L%$] %v");
 
     // 文件 sink：输出所有等级
+    // 基础文件 sink，false 表示追加模式
     auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/blogtool.log", false);
     file_sink->set_level(spdlog::level::trace);
     file_sink->set_pattern("[%Y-%m-%d %H:%M:%S] [%l] %v");
+
+    // 这里使用 daily_logger_mt 创建一个每天新建日志文件的 logger
+    // auto daily_logger = spdlog::daily_logger_mt("daily_logger", "logs/blogtool.log", 0, 0);
 
     // 创建 logger
     std::vector<spdlog::sink_ptr> sinks{file_sink, console_sink};
