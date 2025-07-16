@@ -13,4 +13,5 @@ target_include_directories(${tgt_name} PUBLIC include)
 target_link_libraries(${tgt_name} PRIVATE 
     CLI11::CLI11
     fmt::fmt
+    spdlog::spdlog
 )
