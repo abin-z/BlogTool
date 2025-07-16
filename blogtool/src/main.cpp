@@ -1,4 +1,7 @@
 #include <fmt/core.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 
 #include <CLI/CLI.hpp>
 #include <cstdlib>
@@ -11,6 +14,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
+
+void set_file_logger();
 
 // Windows 宽字符转 UTF-8
 std::string utf16_to_utf8(const std::wstring& wstr)
@@ -37,6 +42,7 @@ std::vector<std::string> convert_wargv_to_utf8_strings(int argc, wchar_t** wargv
 // 业务逻辑统一函数，用 UTF-8 编码参数
 inline int run_cli(int argc, char** argv)
 {
+  set_file_logger();
 #ifdef _WIN32
   std::system("chcp 65001 > nul");  // 设置控制台编码为 UTF-8，静默输出
   std::system("cls");
@@ -56,42 +62,39 @@ inline int run_cli(int argc, char** argv)
   ini::inifile config;
   if (!config.load(config_file))
   {
-    fmt::print("无法加载配置文件: {}\n", config_file);
+    spdlog::warn("无法加载配置文件: {}", config_file);
     return 1;  // 返回错误码
   }
-  fmt::print("加载配置文件: {}\n", config_file);
+  spdlog::info("加载配置文件: {}", config_file);
 
   // 读取配置文件中的路径是否存在, hugo 和 typora 的路径, 不存在则提示指定路径(安装)
 
-
   // 请求输入博客名称
-
 
   // 创建新的博客, 同时用 Typora 编辑器打开刚才创建的博客文件
 
-
-  fmt::print("Hello, {}!\n", name);
-  fmt::print("请输入要创建的博客标题: \n");
+  spdlog::info("Hello, {}!", name);
+  spdlog::info("请输入要创建的博客标题: ");
 
   std::string title;
   std::getline(std::cin, title);
   if (title.empty())
   {
-    fmt::print("标题不能为空，请重新输入。\n");
+    spdlog::warn("标题不能为空，请重新输入。");
     return 1;  // 返回错误码
   }
-  fmt::print("正在创建博客: {}\n", title);
+  spdlog::info("正在创建博客: {}", title);
   // TODO 需要到hugo目录下执行命令, 使用c++17的filesystem库来获取当前目录
   std::string command = fmt::format("hugo new post/{}/index.md", title);
-  fmt::print("执行命令: {}\n", command);
+  spdlog::info("执行命令: {}", command);
   int ret = std::system("cmake --version");
-  fmt::print("命令执行结果: {}\n", ret);
+  spdlog::info("命令执行结果: {}", ret);
 
   //
   std::string typorapath = "typora.exe";
 
   ret = std::system("typora.exe");
-  fmt::print("Typora 打开结果: {}\n", ret);
+  spdlog::info("Typora 打开结果: {}", ret);
 
   return 0;
 }
@@ -115,3 +118,41 @@ int main(int argc, char** argv)
   return run_cli(argc, argv);
 }
 #endif
+
+void set_file_logger()
+{
+  try
+  {
+    // 控制台 sink：只输出 info 以上
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    console_sink->set_level(spdlog::level::info);
+    console_sink->set_pattern("[%^%Y-%m-%d %H:%M:%S %L%$] %v");
+
+    // 文件 sink：输出所有等级
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/blogtool.log", true);
+    file_sink->set_level(spdlog::level::trace);
+    file_sink->set_pattern("[%Y-%m-%d %H:%M:%S] [%l] %v");
+
+    // 创建 logger
+    std::vector<spdlog::sink_ptr> sinks{console_sink, file_sink};
+    auto logger = std::make_shared<spdlog::logger>("multi_logger", sinks.begin(), sinks.end());
+
+    // 设置为默认
+    spdlog::set_default_logger(logger);
+
+    // 设置 logger 总体等级（logger 不会转发低于该等级的日志给 sinks）
+    logger->set_level(spdlog::level::trace);  // 所有日志等级都传给 sinks
+    spdlog::flush_on(spdlog::level::info);
+
+    // 测试
+    spdlog::trace("这条 trace 日志只写入文件");
+    spdlog::debug("这条 debug 日志只写入文件");
+    spdlog::info("这条 info 日志同时输出到控制台和文件");
+    spdlog::warn("警告日志");
+    spdlog::error("错误日志");
+  }
+  catch (const spdlog::spdlog_ex& ex)
+  {
+    std::cerr << "日志初始化失败: " << ex.what() << std::endl;
+  }
+}
