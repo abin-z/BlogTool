@@ -42,13 +42,13 @@ std::vector<std::string> convert_wargv_to_utf8_strings(int argc, wchar_t** wargv
 // 业务逻辑统一函数，用 UTF-8 编码参数
 inline int run_cli(int argc, char** argv)
 {
-  set_file_logger();
 #ifdef _WIN32
   std::system("chcp 65001 > nul");  // 设置控制台编码为 UTF-8，静默输出
   std::system("cls");
 #else
   std::system("clear");
 #endif
+  set_file_logger();
 
   CLI::App app{"A CLI + fmt demo"};
 
@@ -129,12 +129,12 @@ void set_file_logger()
     console_sink->set_pattern("[%^%Y-%m-%d %H:%M:%S %L%$] %v");
 
     // 文件 sink：输出所有等级
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/blogtool.log", true);
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/blogtool.log", false);
     file_sink->set_level(spdlog::level::trace);
     file_sink->set_pattern("[%Y-%m-%d %H:%M:%S] [%l] %v");
 
     // 创建 logger
-    std::vector<spdlog::sink_ptr> sinks{console_sink, file_sink};
+    std::vector<spdlog::sink_ptr> sinks{file_sink, console_sink};
     auto logger = std::make_shared<spdlog::logger>("multi_logger", sinks.begin(), sinks.end());
 
     // 设置为默认
@@ -145,6 +145,7 @@ void set_file_logger()
     spdlog::flush_on(spdlog::level::info);
 
     // 测试
+    spdlog::info("======================================");
     spdlog::trace("这条 trace 日志只写入文件");
     spdlog::debug("这条 debug 日志只写入文件");
     spdlog::info("这条 info 日志同时输出到控制台和文件");
