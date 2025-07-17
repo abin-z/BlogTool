@@ -6,6 +6,7 @@
 
 #include <CLI/CLI.hpp>
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -14,6 +15,8 @@
 #include "fmt/base.h"
 #include "inifile.h"
 #include "spdlog/common.h"
+
+namespace fs = std::filesystem;
 
 #ifdef _WIN32
 #include <windows.h>
@@ -63,13 +66,20 @@ inline int run_cli(int argc, char** argv)
   // 检测配置文件是否存在
   static constexpr char config_file[] = "blogtool.ini";
   ini::inifile config;
-  if (!config.load(config_file))
+  if (!fs::exists(config_file))
   {
-    spdlog::warn("无法加载配置文件: {}", config_file);
-    return 1;  // 返回错误码
+    spdlog::warn("配置文件不存在: {}", config_file);
+  }
+  else 
+  {
+    // TODO: 读取配置文件
+    if (!config.load(config_file))
+    {
+      spdlog::warn("无法加载配置文件: {}", config_file);
+    }
   }
   spdlog::info("加载配置文件: {}", config_file);
-
+  
   // 读取配置文件中的路径是否存在, hugo 和 typora 的路径, 不存在则提示指定路径(安装)
 
   // 请求输入博客名称
@@ -150,7 +160,7 @@ void set_file_logger()
 
     // 设置 logger 总体等级（logger 不会转发低于该等级的日志给 sinks）
     logger->set_level(spdlog::level::trace);  // 所有日志等级都传给 sinks
-    spdlog::flush_on(spdlog::level::info);
+    spdlog::flush_on(spdlog::level::warn);    // 设置 flush 条件为警告及以上等级
 
     // 测试
     spdlog::info("======================================");
