@@ -7,11 +7,13 @@
 #include <CLI/CLI.hpp>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include "fmt/base.h"
 #include "inifile.h"
+#include "spdlog/common.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -127,19 +129,20 @@ void set_file_logger()
     // 控制台 sink：只输出 info 以上
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     console_sink->set_level(spdlog::level::info);
-    console_sink->set_pattern("[%^%Y-%m-%d %H:%M:%S %L%$] %v");
+    console_sink->set_pattern("[%^%Y-%m-%d %H:%M:%S.%e %L%$] %v");
 
     // 文件 sink：输出所有等级
-    // 基础文件 sink，false 表示追加模式
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/blogtool.log", false);
-    file_sink->set_level(spdlog::level::trace);
-    file_sink->set_pattern("[%Y-%m-%d %H:%M:%S] [%l] %v");
+    // // 基础文件 sink，false 表示追加模式
+    // auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("blogtool_logs/blogtool.log", false);
+    // file_sink->set_level(spdlog::level::trace);
+    // file_sink->set_pattern("[%Y-%m-%d %H:%M:%S] [%l] %v");
 
-    // 这里使用 daily_logger_mt 创建一个每天新建日志文件的 logger
-    // auto daily_logger = spdlog::daily_logger_mt("daily_logger", "logs/blogtool.log", 0, 0);
-
+    // 这里使用 daily_logger_mt 创建一个每天 00:00 新建日志文件的 logger
+    auto daily_file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>("blogtool_logs/blogtool.log", 0, 0);
+    daily_file_sink->set_level(spdlog::level::trace);
+    daily_file_sink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] %v");
     // 创建 logger
-    std::vector<spdlog::sink_ptr> sinks{file_sink, console_sink};
+    std::vector<spdlog::sink_ptr> sinks{daily_file_sink, console_sink};
     auto logger = std::make_shared<spdlog::logger>("multi_logger", sinks.begin(), sinks.end());
 
     // 设置为默认
