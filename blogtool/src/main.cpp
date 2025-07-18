@@ -66,17 +66,22 @@ inline int run_cli(int argc, char** argv)
   // 检测配置文件是否存在
   static constexpr char config_file[] = "blogtool.ini";
   ini::inifile config;
-  if (!fs::exists(config_file))
+  if (!fs::exists(config_file) && !config.load(config_file))
   {
-    spdlog::warn("配置文件不存在: {}", config_file);
+    spdlog::warn("配置文件不存在或无法加载: {}", config_file);
+    fmt::println("提示: 本软件运行依赖于hugo和typora, 请确保已安装并配置好环境变量!");
+    fmt::println("请输入hugo的安装路径:");
+    std::string hugo_path;
+    std::getline(std::cin, hugo_path);
+    // 检查路径是否存在
+
+    
+    config["hugo"]["path"] = hugo_path;
   }
   else 
   {
-    // TODO: 读取配置文件
-    if (!config.load(config_file))
-    {
-      spdlog::warn("无法加载配置文件: {}", config_file);
-    }
+
+
   }
   spdlog::info("加载配置文件: {}", config_file);
   
