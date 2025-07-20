@@ -45,11 +45,11 @@ std::vector<std::string> convert_wargv_to_utf8_strings(int argc, wchar_t** wargv
 }
 #endif
 
-// 业务逻辑统一函数，用 UTF-8 编码参数
+// 业务逻辑统一函数, 用 UTF-8 编码参数
 inline int run_cli(int argc, char** argv)
 {
 #ifdef _WIN32
-  std::system("chcp 65001 > nul");  // 设置控制台编码为 UTF-8，静默输出
+  std::system("chcp 65001 > nul");  // 设置控制台编码为 UTF-8, 静默输出
   std::system("cls");
 #else
   std::system("clear");
@@ -98,8 +98,8 @@ inline int run_cli(int argc, char** argv)
   std::getline(std::cin, title);
   if (title.empty())
   {
-    spdlog::warn("标题不能为空，请重新输入。");
-    return 1;  // 返回错误码
+    spdlog::warn("标题不能为空, 请重新输入。");
+    return 1;
   }
   spdlog::info("正在创建博客: {}", title);
   // TODO 需要到hugo目录下执行命令, 使用c++17的filesystem库来获取当前目录
@@ -120,10 +120,10 @@ inline int run_cli(int argc, char** argv)
 #ifdef _WIN32
 int wmain(int argc, wchar_t** wargv)  // Windows 使用 wmain 入口点,保证输入中文输入不会崩溃
 {
-  // 转换宽字符参数到 UTF-8 字符串，存储起来，保证指针有效
+  // 转换宽字符参数到 UTF-8 字符串, 存储起来, 保证指针有效
   std::vector<std::string> utf8_args = convert_wargv_to_utf8_strings(argc, wargv);
 
-  // 创建 char* 数组指针，供 CLI11 使用
+  // 创建 char* 数组指针, 供 CLI11 使用
   std::vector<char*> argv;
   argv.reserve(argc);
   for (auto& arg : utf8_args) argv.push_back(arg.data());
@@ -147,7 +147,7 @@ void set_file_logger()
     console_sink->set_pattern("[%^%Y-%m-%d %H:%M:%S.%e %L%$] %v");
 
     // 文件 sink：输出所有等级
-    // // 基础文件 sink，false 表示追加模式
+    // // 基础文件 sink, false 表示追加模式
     // auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("blogtool_logs/blogtool.log", false);
     // file_sink->set_level(spdlog::level::trace);
     // file_sink->set_pattern("[%Y-%m-%d %H:%M:%S] [%l] %v");
