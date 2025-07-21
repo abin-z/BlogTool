@@ -74,6 +74,13 @@ inline int run_cli(int argc, char** argv)
     std::string hugo_path;
     std::getline(std::cin, hugo_path);
     // 检查路径是否存在
+    fs::path hugo_fs_path(hugo_path);
+    if (!fs::exists(hugo_fs_path) || !fs::is_directory(hugo_fs_path))
+    {
+      spdlog::error("指定的路径不存在或不是一个目录: {}", hugo_path);
+      fmt::println("请重新运行程序并指定正确的hugo安装路径.");
+      return 1;
+    }
 
     
     config["hugo"]["path"] = hugo_path;
