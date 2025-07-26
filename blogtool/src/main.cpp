@@ -115,7 +115,6 @@ inline int run_cli(int argc, char** argv)
   int ret = std::system("cmake --version");
   spdlog::info("命令执行结果: {}", ret);
 
-  //
   std::string typorapath = "typora.exe";
 
   ret = std::system("typora.exe");
