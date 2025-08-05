@@ -72,6 +72,7 @@ inline int run_cli(int argc, char** argv)
     fmt::println("提示: 本软件运行依赖于hugo和typora, 请确保已安装并配置好环境变量!");
     fmt::println("请输入hugo的安装路径:");
     std::string hugo_path;
+    std::string typora_path;
     std::getline(std::cin, hugo_path);
     // 检查路径是否存在
     fs::path hugo_fs_path(hugo_path);
@@ -79,6 +80,15 @@ inline int run_cli(int argc, char** argv)
     {
       spdlog::error("指定的路径不存在或不是一个目录: {}", hugo_path);
       fmt::println("请重新运行程序并指定正确的hugo安装路径.");
+      return 1;
+    }
+    fmt::println("请输入hugo的安装路径:");
+    std::getline(std::cin, typora_path);
+    fs::path typora_fs_path(typora_path);
+    if (!fs::exists(typora_fs_path) || !fs::is_directory(typora_fs_path))
+    {
+      spdlog::error("指定的路径不存在或不是一个目录: {}", typora_path);
+      fmt::println("请重新运行程序并指定正确的Typora安装路径.");
       return 1;
     }
 
