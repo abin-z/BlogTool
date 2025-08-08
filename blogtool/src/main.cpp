@@ -45,6 +45,7 @@ std::vector<std::string> convert_wargv_to_utf8_strings(int argc, wchar_t** wargv
 }
 #endif
 
+
 // 业务逻辑统一函数, 用 UTF-8 编码参数
 inline int run_cli(int argc, char** argv)
 {
@@ -66,38 +67,38 @@ inline int run_cli(int argc, char** argv)
   // 检测配置文件是否存在
   static constexpr char config_file[] = "blogtool.ini";
   ini::inifile config;
-  if (!fs::exists(config_file) && !config.load(config_file))
+  if (!fs::exists(config_file) || !fs::is_regular_file(config_file)) // 配置文件不存在
   {
     spdlog::warn("配置文件不存在或无法加载: {}", config_file);
     fmt::println("提示: 本软件运行依赖于hugo和typora, 请确保已安装并配置好环境变量!");
-    fmt::println("请输入hugo的安装路径:");
-    std::string hugo_path;
-    std::string typora_path;
-    std::getline(std::cin, hugo_path);
-    // 检查路径是否存在
-    fs::path hugo_fs_path(hugo_path);
-    if (!fs::exists(hugo_fs_path) || !fs::is_directory(hugo_fs_path))
+    fs::path hugo_path;
+    fs::path typora_path;
+    do
     {
-      spdlog::error("指定的路径不存在或不是一个目录: {}", hugo_path);
-      fmt::println("请重新运行程序并指定正确的hugo安装路径.");
-      return 1;
-    }
-    fmt::println("请输入hugo的安装路径:");
-    std::getline(std::cin, typora_path);
-    fs::path typora_fs_path(typora_path);
-    if (!fs::exists(typora_fs_path) || !fs::is_directory(typora_fs_path))
-    {
-      spdlog::error("指定的路径不存在或不是一个目录: {}", typora_path);
-      fmt::println("请重新运行程序并指定正确的Typora安装路径.");
-      return 1;
-    }
+      std::string temp;
+      fmt::println("未找到hugo可执行文件, 请输入hugo的安装路径:");
+      std::getline(std::cin, temp);
+      // 检查路径是否存在
+      fs::path hugo_path(temp);
+    } while (!fs::exists(hugo_path) && !fs::is_regular_file(hugo_path));
+    config["hugo"]["path"] = hugo_path.string();
+    spdlog::info("已设置 Hugo 安装路径: {}", hugo_path.string());
 
-    
-    config["hugo"]["path"] = hugo_path;
+    do{
+      std::string temp;
+      fmt::println("未找到Typora可执行文件, 请输入Typora的安装路径:");
+      std::getline(std::cin, temp);
+      // 检查路径是否存在
+      fs::path typora_path(temp);
+    }while (!fs::exists(typora_path) && !fs::is_regular_file(typora_path));
+    config["typora"]["path"] = typora_path.string();
+    spdlog::info("已设置 Typora 安装路径: {}", typora_path.string());
   }
   else 
   {
-
+    config.load(config_file);
+    config.contains("hugo", "path");
+    config.contains("typora", "path");
 
   }
   spdlog::info("加载配置文件: {}", config_file);
