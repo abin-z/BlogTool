@@ -93,10 +93,12 @@ inline int run_cli(int argc, char** argv)
     }while (!fs::exists(typora_path) && !fs::is_regular_file(typora_path));
     config["typora"]["path"] = typora_path.string();
     spdlog::info("已设置 Typora 安装路径: {}", typora_path.string());
+    config.save(config_file); // 保存配置文件
   }
   else 
   {
     config.load(config_file);
+    // TODO 检查路径是否存在
     config.contains("hugo", "path");
     config.contains("typora", "path");
 
