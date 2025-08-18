@@ -45,7 +45,6 @@ std::vector<std::string> convert_wargv_to_utf8_strings(int argc, wchar_t** wargv
 }
 #endif
 
-
 // 业务逻辑统一函数, 用 UTF-8 编码参数
 inline int run_cli(int argc, char** argv)
 {
@@ -67,7 +66,7 @@ inline int run_cli(int argc, char** argv)
   // 检测配置文件是否存在
   static constexpr char config_file[] = "blogtool.ini";
   ini::inifile config;
-  if (!fs::exists(config_file) || !fs::is_regular_file(config_file)) // 配置文件不存在
+  if (!fs::exists(config_file) || !fs::is_regular_file(config_file))  // 配置文件不存在
   {
     spdlog::warn("配置文件不存在或无法加载: {}", config_file);
     fmt::println("提示: 本软件运行依赖于hugo和typora, 请确保已安装并配置好环境变量!");
@@ -84,27 +83,42 @@ inline int run_cli(int argc, char** argv)
     config["hugo"]["path"] = hugo_path.string();
     spdlog::info("已设置 Hugo 安装路径: {}", hugo_path.string());
 
-    do{
+    do
+    {
       std::string temp;
       fmt::println("未找到Typora可执行文件, 请输入Typora的安装路径:");
       std::getline(std::cin, temp);
       // 检查路径是否存在
       fs::path typora_path(temp);
-    }while (!fs::exists(typora_path) && !fs::is_regular_file(typora_path));
+    } while (!fs::exists(typora_path) && !fs::is_regular_file(typora_path));
     config["typora"]["path"] = typora_path.string();
     spdlog::info("已设置 Typora 安装路径: {}", typora_path.string());
-    config.save(config_file); // 保存配置文件
+    config.save(config_file);  // 保存配置文件
   }
-  else 
+  else
   {
     config.load(config_file);
     // TODO 检查路径是否存在
-    config.contains("hugo", "path");
-    config.contains("typora", "path");
-
+    if (config.contains("hugo", "path"))
+    {
+      fs::path hugo_path = config["hugo"]["path"];
+      if (!fs::exists(hugo_path) || !fs::is_regular_file(hugo_path))
+      {
+        spdlog::warn("Hugo 安装路径无效: {}", hugo_path.string());
+      }
+    }
+    if (config.contains("typora", "path"))
+    {
+      fs::path typora_path = config["typora"]["path"];
+      if (!fs::exists(typora_path) || !fs::is_regular_file(typora_path))
+      {
+        spdlog::warn("Typora 安装路径无效: {}", typora_path.string());
+      }
+    }
   }
+
   spdlog::info("加载配置文件: {}", config_file);
-  
+
   // 读取配置文件中的路径是否存在, hugo 和 typora 的路径, 不存在则提示指定路径(安装)
 
   // 请求输入博客名称
