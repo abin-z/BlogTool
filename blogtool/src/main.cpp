@@ -162,8 +162,9 @@ inline int run_cli(int argc, char** argv)
   int ret = std::system("cmake --version");
   spdlog::info("命令执行结果: {}", ret);
 
-  ret = std::system(typora_path.string().c_str());
-  spdlog::info("Typora 打开结果: {}", ret);
+  std::string typora_command = fmt::format("\"{}\"", typora_path.string());
+  ret = std::system(typora_command.c_str());
+  spdlog::info("Typora 打开结果: {} {}", ret, typora_command);
 
   return 0;
 }
