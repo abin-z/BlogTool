@@ -54,8 +54,8 @@ void config_hugo_path(const std::string& cfg_path, ini::inifile& config)
     fmt::println("未找到hugo可执行文件, 请输入hugo的安装路径:");
     std::getline(std::cin, temp);
     // 检查路径是否存在
-    fs::path hugo_path(temp);
-  } while (!fs::exists(hugo_path) && !fs::is_regular_file(hugo_path));
+    hugo_path = fs::path(temp);
+  } while (!fs::exists(hugo_path) || !fs::is_regular_file(hugo_path));
   config["hugo"]["path"] = hugo_path.string();
   spdlog::info("已设置 Hugo 安装路径: {}", hugo_path.string());
   config.save(cfg_path);  // 保存配置文件
@@ -70,8 +70,8 @@ void config_typora_path(const std::string& cfg_path, ini::inifile& config)
     fmt::println("未找到Typora可执行文件, 请输入Typora的安装路径:");
     std::getline(std::cin, temp);
     // 检查路径是否存在
-    fs::path typora_path(temp);
-  } while (!fs::exists(typora_path) && !fs::is_regular_file(typora_path));
+    typora_path = fs::path(temp);
+  } while (!fs::exists(typora_path) || !fs::is_regular_file(typora_path));
   config["typora"]["path"] = typora_path.string();
   spdlog::info("已设置 Typora 安装路径: {}", typora_path.string());
   config.save(cfg_path);  // 保存配置文件
@@ -99,8 +99,8 @@ inline int run_cli(int argc, char** argv)
 
   std::string name = "World";
   app.add_option("-n,--name", name, "Name to greet");
-
   CLI11_PARSE(app, argc, argv);
+  spdlog::info("Hello, {}!", name);
 
   // 检测配置文件是否存在
   static constexpr char config_file[] = "blogtool.ini";
@@ -115,7 +115,7 @@ inline int run_cli(int argc, char** argv)
     config.load(config_file);
     if (config.contains("hugo", "path"))
     {
-      fs::path hugo_path = config["hugo"]["path"];
+      fs::path hugo_path = config["hugo"]["path"].as<std::string>();
       if (!fs::exists(hugo_path) || !fs::is_regular_file(hugo_path))
       {
         spdlog::warn("Hugo 安装路径无效: {}", hugo_path.string());
@@ -124,7 +124,7 @@ inline int run_cli(int argc, char** argv)
     }
     if (config.contains("typora", "path"))
     {
-      fs::path typora_path = config["typora"]["path"];
+      fs::path typora_path = config["typora"]["path"].as<std::string>();
       if (!fs::exists(typora_path) || !fs::is_regular_file(typora_path))
       {
         spdlog::warn("Typora 安装路径无效: {}", typora_path.string());
@@ -133,35 +133,28 @@ inline int run_cli(int argc, char** argv)
     }
   }
 
-  fs::path hugo_path = config["hugo"]["path"];
-  fs::path typora_path = config["typora"]["path"];
+  fs::path hugo_path = config["hugo"]["path"].as<std::string>();
+  fs::path typora_path = config["typora"]["path"].as<std::string>();
   spdlog::info("hugo 路径: {}", hugo_path.string());
   spdlog::info("typora 路径: {}", typora_path.string());
 
   // 请求输入博客名称
+  std::string blog_name;
+  do
+  {
+    spdlog::info("请输入要创建的博客标题: ");
+    std::getline(std::cin, blog_name);
+  } while (blog_name.empty());
 
   // 创建新的博客, 同时用 Typora 编辑器打开刚才创建的博客文件
-
-  spdlog::info("Hello, {}!", name);
-  spdlog::info("请输入要创建的博客标题: ");
-
-  std::string title;
-  std::getline(std::cin, title);
-  if (title.empty())
-  {
-    spdlog::warn("标题不能为空, 请重新输入。");
-    return 1;
-  }
-  spdlog::info("正在创建博客: {}", title);
+  spdlog::info("正在创建博客: {}", blog_name);
   // TODO 需要到hugo目录下执行命令, 使用c++17的filesystem库来获取当前目录
-  std::string command = fmt::format("hugo new post/{}/index.md", title);
+  std::string command = fmt::format("hugo new post/{}/index.md", blog_name);
   spdlog::info("执行命令: {}", command);
-  int ret = std::system("cmake --version");
+  int ret = std::system("gcc --version");
   spdlog::info("命令执行结果: {}", ret);
 
-  std::string typorapath = "typora.exe";
-
-  ret = std::system("typora.exe");
+  ret = std::system(typora_path.string().c_str());
   spdlog::info("Typora 打开结果: {}", ret);
 
   return 0;
