@@ -159,7 +159,7 @@ inline int run_cli(int argc, char** argv)
   // TODO 需要到hugo目录下执行命令, 使用c++17的filesystem库来获取当前目录
   std::string command = fmt::format("hugo new post/{}/index.md", blog_name);
   spdlog::info("执行命令: {}", command);
-  int ret = std::system("gcc --version");
+  int ret = std::system("cmake --version");
   spdlog::info("命令执行结果: {}", ret);
 
   ret = std::system(typora_path.string().c_str());
