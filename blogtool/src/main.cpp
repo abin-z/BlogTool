@@ -53,7 +53,11 @@ void config_hugo_path(const std::string& cfg_path, ini::inifile& config)
     std::string temp;
     fmt::println("未找到hugo可执行文件, 请输入hugo的安装路径:");
     std::getline(std::cin, temp);
-    // 检查路径是否存在
+    // 去掉可能的首尾引号
+    if (!temp.empty() && temp.front() == '"' && temp.back() == '"')
+    {
+      temp = temp.substr(1, temp.size() - 2);
+    }
     hugo_path = fs::path(temp);
   } while (!fs::exists(hugo_path) || !fs::is_regular_file(hugo_path));
   config["hugo"]["path"] = hugo_path.string();
@@ -69,7 +73,11 @@ void config_typora_path(const std::string& cfg_path, ini::inifile& config)
     std::string temp;
     fmt::println("未找到Typora可执行文件, 请输入Typora的安装路径:");
     std::getline(std::cin, temp);
-    // 检查路径是否存在
+    // 去掉可能的首尾引号
+    if (!temp.empty() && temp.front() == '"' && temp.back() == '"')
+    {
+      temp = temp.substr(1, temp.size() - 2);
+    }
     typora_path = fs::path(temp);
   } while (!fs::exists(typora_path) || !fs::is_regular_file(typora_path));
   config["typora"]["path"] = typora_path.string();
