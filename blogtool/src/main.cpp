@@ -221,11 +221,6 @@ void set_file_logger()
 
     // 测试
     spdlog::info("======================================");
-    spdlog::trace("这条 trace 日志只写入文件");
-    spdlog::debug("这条 debug 日志只写入文件");
-    spdlog::info("这条 info 日志同时输出到控制台和文件");
-    spdlog::warn("警告日志");
-    spdlog::error("错误日志");
   }
   catch (const spdlog::spdlog_ex& ex)
   {
