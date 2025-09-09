@@ -157,7 +157,7 @@ inline int run_cli(int argc, char** argv)
   // 创建新的博客, 同时用 Typora 编辑器打开刚才创建的博客文件
   spdlog::info("正在创建博客: {}", blog_name);
   // TODO 需要到hugo目录下执行命令, 使用c++17的filesystem库来获取当前目录
-  std::string command = fmt::format("hugo new post/{}/index.md", blog_name);
+  std::string command = fmt::format("\"{}\" new post/{}/index.md", hugo_path.string(), blog_name);
   spdlog::info("执行命令: {}", command);
   int ret = std::system(command.c_str());
   spdlog::info("命令执行结果: {}", ret);
