@@ -180,9 +180,22 @@ inline int run_cli(int argc, char** argv)
   spdlog::info("blog 路径: {}", blog_path.string());
 
   // 切换到博客目录
-  fs::current_path(blog_path);
-  spdlog::info("当前工作目录: {}", fs::current_path().string());
-  
+  try
+  {
+    fs::current_path(blog_path);
+    spdlog::info("当前工作目录: {}", fs::current_path().string());
+  }
+  catch (const fs::filesystem_error& e)
+  {
+    spdlog::error("切换目录失败: {}", e.what());
+    return -1;
+  }
+  catch (const std::exception& e)
+  {
+    spdlog::error("未知错误: {}", e.what());
+    return -1;
+  }
+
   // 请求输入博客名称
   std::string blog_name;
   do
