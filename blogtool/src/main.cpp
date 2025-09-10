@@ -1,4 +1,5 @@
 #include <fmt/core.h>
+#include <objidlbase.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/daily_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -109,6 +110,7 @@ void config_path(const std::string& cfg_path, ini::inifile& config)
 {
   fmt::println("提示: 本软件运行依赖于hugo和typora, 请确保已安装并配置好环境变量!");
   config_hugo_path(cfg_path, config);
+  config_blog_path(cfg_path, config);
   config_typora_path(cfg_path, config);
 }
 
@@ -157,6 +159,15 @@ inline int run_cli(int argc, char** argv)
       {
         spdlog::warn("Typora 安装路径无效: {}", typora_path.string());
         config_typora_path(config_file, config);
+      }
+    }
+    if (config.contains("blog", "path"))
+    {
+      fs::path blog_path = config["blog"]["path"].as<std::string>();
+      if (!fs::exists(blog_path) || !fs::is_directory(blog_path))
+      {
+        spdlog::warn("博客站点根目录路径无效: {}", blog_path.string());
+        config_blog_path(config_file, config);
       }
     }
   }
