@@ -174,9 +174,15 @@ inline int run_cli(int argc, char** argv)
 
   fs::path hugo_path = config["hugo"]["path"].as<std::string>();
   fs::path typora_path = config["typora"]["path"].as<std::string>();
+  fs::path blog_path = config["blog"]["path"].as<std::string>();
   spdlog::info("hugo 路径: {}", hugo_path.string());
   spdlog::info("typora 路径: {}", typora_path.string());
+  spdlog::info("blog 路径: {}", blog_path.string());
 
+  // 切换到博客目录
+  fs::current_path(blog_path);
+  spdlog::info("当前工作目录: {}", fs::current_path().string());
+  
   // 请求输入博客名称
   std::string blog_name;
   do
