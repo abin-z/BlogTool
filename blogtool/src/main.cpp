@@ -85,6 +85,26 @@ void config_typora_path(const std::string& cfg_path, ini::inifile& config)
   config.save(cfg_path);  // 保存配置文件
 }
 
+void config_blog_path(const std::string& cfg_path, ini::inifile& config)
+{
+  fs::path blog_path;
+  do
+  {
+    std::string temp;
+    fmt::println("请输入博客站点的根目录路径:");
+    std::getline(std::cin, temp);
+    // 去掉可能的首尾引号
+    if (!temp.empty() && temp.front() == '"' && temp.back() == '"')
+    {
+      temp = temp.substr(1, temp.size() - 2);
+    }
+    blog_path = fs::path(temp);
+  } while (!fs::exists(blog_path) || !fs::is_directory(blog_path));
+  config["blog"]["path"] = blog_path.string();
+  spdlog::info("已设置博客站点根目录路径: {}", blog_path.string());
+  config.save(cfg_path);  // 保存配置文件
+}
+
 void config_path(const std::string& cfg_path, ini::inifile& config)
 {
   fmt::println("提示: 本软件运行依赖于hugo和typora, 请确保已安装并配置好环境变量!");
