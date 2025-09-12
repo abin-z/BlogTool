@@ -172,6 +172,13 @@ inline int run_cli(int argc, char** argv)
     }
   }
 
+  if (config.contains("hugo", "path") == false || config.contains("typora", "path") == false ||
+      config.contains("blog", "path") == false)
+  {
+    spdlog::error("配置文件缺少必要的配置项, 请重新配置");
+    config_path(config_file, config);
+  }
+
   fs::path hugo_path = config["hugo"]["path"].as<std::string>();
   fs::path typora_path = config["typora"]["path"].as<std::string>();
   fs::path blog_path = config["blog"]["path"].as<std::string>();
